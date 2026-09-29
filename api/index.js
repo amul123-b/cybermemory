@@ -1,20 +1,8 @@
 const express = require("express");
-const path = require("path");
 
 const app = express();
 
 app.use(express.json());
-
-// ===============================
-// SERVE CYBERMEMORY FRONTEND
-// ===============================
-
-app.use(express.static(path.join(process.cwd())));
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(process.cwd(), "index.html"));
-});
-
 
 const HINDSIGHT_API_KEY = process.env.HINDSIGHT_API_KEY;
 const HINDSIGHT_BANK_ID = process.env.HINDSIGHT_BANK_ID;
@@ -43,9 +31,7 @@ app.get("/api/health", (req, res) => {
 // ===============================
 
 app.post("/api/retain", async (req, res) => {
-
     try {
-
         const { content } = req.body;
 
         if (!content || !content.trim()) {
@@ -59,14 +45,10 @@ app.post("/api/retain", async (req, res) => {
             `${HINDSIGHT_BASE_URL}/v1/default/banks/${HINDSIGHT_BANK_ID}/memories`,
             {
                 method: "POST",
-
                 headers: {
-                    "Authorization":
-                        `Bearer ${HINDSIGHT_API_KEY}`,
-                    "Content-Type":
-                        "application/json"
+                    "Authorization": `Bearer ${HINDSIGHT_API_KEY}`,
+                    "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify({
                     items: [
                         {
@@ -102,7 +84,6 @@ app.post("/api/retain", async (req, res) => {
         });
 
     } catch (error) {
-
         console.error(
             "Retain error:",
             error
@@ -121,9 +102,7 @@ app.post("/api/retain", async (req, res) => {
 // ===============================
 
 app.post("/api/recall", async (req, res) => {
-
     try {
-
         const { query } = req.body;
 
         if (!query || !query.trim()) {
@@ -137,14 +116,10 @@ app.post("/api/recall", async (req, res) => {
             `${HINDSIGHT_BASE_URL}/v1/default/banks/${HINDSIGHT_BANK_ID}/memories/recall`,
             {
                 method: "POST",
-
                 headers: {
-                    "Authorization":
-                        `Bearer ${HINDSIGHT_API_KEY}`,
-                    "Content-Type":
-                        "application/json"
+                    "Authorization": `Bearer ${HINDSIGHT_API_KEY}`,
+                    "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify({
                     query: query
                 })
@@ -154,7 +129,6 @@ app.post("/api/recall", async (req, res) => {
         const data = await response.json();
 
         if (!response.ok) {
-
             console.error(
                 "Hindsight recall error:",
                 data
@@ -175,7 +149,6 @@ app.post("/api/recall", async (req, res) => {
         });
 
     } catch (error) {
-
         console.error(
             "Recall error:",
             error
