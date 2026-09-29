@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CYBERMEMORY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b; --surface:#131315; --surface2:#1a1a1d; --border:#2a2a2e;
+  --text:#f2f0ee; --muted:#9a9a9e; --crimson:#9a1f2c; --crimson-bright:#c22a3a;
+  --ok:#3f8f6b; --warn:#c98a2c;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  box-sizing:border-box;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100%;}
+h1,h2,h3,.serif{font-family:'Playfair Display',serif;}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+
+/* LOGIN */
+#login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 20%,#161617,#08080a 70%);}
+.login-box{width:100%;max-width:380px;padding:48px 40px;background:var(--surface);border:1px solid var(--border);border-radius:4px;text-align:center;animation:fadein .6s ease;}
+.logo{font-family:'Playfair Display',serif;font-size:28px;letter-spacing:2px;font-weight:600;}
+.logo span{color:var(--crimson-bright)}
+.brand-wrap{text-align:center;margin-bottom:clamp(24px,5vh,48px);animation:fadein .6s ease;}
+.brand-big{font-size:clamp(40px,8vw,88px);letter-spacing:4px;line-height:1.05;}
+.brand-sub{margin:14px 0 0;font-size:clamp(11px,1.3vw,14px);}
+.login-sub{color:var(--muted);font-size:11px;letter-spacing:3px;margin:6px 0 32px;text-transform:uppercase}
+input{width:100%;padding:12px 14px;margin-bottom:14px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:inherit;font-size:14px;}
+input:focus{outline:none;border-color:var(--crimson)}
+.btn{width:100%;padding:13px;border:none;border-radius:3px;font-family:inherit;font-weight:600;font-size:13px;letter-spacing:1px;cursor:pointer;transition:.2s;}
+.btn-primary{background:var(--crimson);color:#fff;}
+.btn-primary:hover{background:var(--crimson-bright)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);margin-top:10px;}
+.btn-ghost:hover{border-color:var(--crimson);color:var(--text)}
+
+/* APP SHELL */
+#app{display:none;min-height:100vh;}
+#app.active{display:block}
+.topbar{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--border);}
+.tb-left{display:flex;align-items:center;gap:14px}
+.menu-btn{background:transparent;border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:4px;cursor:pointer;font-size:17px;line-height:1;transition:.15s}
+.menu-btn:hover{border-color:var(--crimson-bright)}
+.tb-brand{font-family:'Playfair Display',serif;font-size:17px;letter-spacing:1.5px}
+.tb-brand span{color:var(--crimson-bright)}
+.tb-user{font-size:12.5px;color:var(--muted)}
+.shell{display:flex;align-items:flex-start;}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);width:230px;flex:none;overflow:hidden;position:sticky;top:56px;height:calc(100vh - 56px);transition:width .25s ease,border-color .25s ease;}
+.sb-inner{width:230px;height:100%;padding:24px 18px;display:flex;flex-direction:column;}
+#app:not(.sb-open) .sidebar{width:0;border-right-color:transparent;visibility:hidden;transition:width .25s ease,border-color .25s ease,visibility 0s .25s;}
+.sb-logo{font-family:'Playfair Display',serif;font-size:19px;letter-spacing:1.5px;margin-bottom:36px;padding-left:6px}
+.sb-logo span{color:var(--crimson-bright)}
+.nav-item{padding:11px 12px;border-radius:4px;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;margin-bottom:2px;transition:.15s;display:flex;align-items:center;gap:10px;}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--surface2);color:var(--text);border-left:2px solid var(--crimson-bright);padding-left:10px}
+.sb-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border);font-size:12.5px;}
+.dot{width:7px;height:7px;background:var(--ok);border-radius:50%;display:inline-block;margin-right:6px}
+.main{flex:1;min-width:0;padding:34px clamp(18px,4vw,48px);overflow-x:clip;}
+.main>.view{max-width:1180px;margin:0 auto;}
+.view{display:none;animation:fadein .35s ease;}
+.view.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pagetitle{font-size:30px;margin:0 0 4px}
+.pagesub{color:var(--muted);font-size:14px;margin:0 0 28px}
+.crumb{color:var(--muted);font-size:12.5px;margin-bottom:14px;cursor:pointer}
+.crumb span{color:var(--text)}
+
+/* CARDS / GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:20px;}
+.stat-num{font-family:'Playfair Display',serif;font-size:34px;}
+.stat-label{color:var(--muted);font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:22px;margin-bottom:20px;}
+.card h3{margin:0 0 14px;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;letter-spacing:.3px;color:#e8e6e3}
+
+.err{color:#e2586a;font-size:12px;margin:-10px 0 14px;display:none}
+textarea.bad,select.bad{border-color:var(--crimson-bright) !important}
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;color:var(--muted);font-weight:500;font-size:11px;letter-spacing:.6px;text-transform:uppercase;padding:10px 12px;border-bottom:1px solid var(--border);}
+td{padding:13px 12px;border-bottom:1px solid #202023;}
+tr.rowlink{cursor:pointer;transition:.15s}
+tr.rowlink:hover{background:var(--surface2)}
+.sev{padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.5px;}
+.sev-high{background:rgba(194,42,58,.18);color:#e2586a;}
+.sev-medium{background:rgba(201,138,44,.18);color:#e0a75a;}
+.sev-low{background:rgba(63,143,107,.18);color:#6bc79b;}
+.status-pill{font-size:11.5px;color:var(--muted);}
+.status-pill.investigating{color:#e0a75a}
+.status-pill.resolved{color:#6bc79b}
+
+/* BUTTONS */
+.btn-mem{background:linear-gradient(135deg,var(--crimson),#6e1520);color:#fff;border:none;padding:10px 20px;border-radius:3px;font-weight:600;font-size:12.5px;letter-spacing:.8px;cursor:pointer;}
+.btn-mem:hover{filter:brightness(1.15)}
+.btn-sm{padding:6px 13px;font-size:11.5px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;}
+.btn-sm:hover{border-color:var(--crimson-bright)}
+
+/* INVESTIGATION */
+.progress-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13.5px;color:var(--muted);opacity:0;animation:slidein .4s ease forwards;}
+.progress-item .tick{color:var(--ok);width:16px;}
+@keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.match-card{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:18px;margin-bottom:14px;position:relative;}
+.match-card .rel{position:absolute;top:16px;right:16px;font-size:20px;font-family:'Playfair Display',serif;color:var(--crimson-bright)}
+.match-card h4{margin:0 0 3px;font-size:16px;font-family:'Playfair Display',serif;}
+.match-card .type{color:var(--muted);font-size:12.5px;margin-bottom:12px;}
+.mm-row{display:flex;gap:24px;font-size:12.5px;margin-top:8px;}
+.mm-row div{flex:1}
+.mm-label{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+
+/* TIMELINE */
+.replay-step{display:flex;gap:16px;padding:18px 0;border-left:2px solid var(--border);padding-left:24px;margin-left:10px;position:relative;opacity:0;animation:slidein .5s ease forwards;}
+.replay-step:before{content:'';width:11px;height:11px;border-radius:50%;background:var(--crimson-bright);position:absolute;left:-6.5px;top:22px;}
+.replay-step:last-child{border-left:2px solid transparent}
+.rs-num{color:var(--muted);font-size:10.5px;letter-spacing:1px;font-weight:600;}
+.rs-title{font-family:'Playfair Display',serif;font-size:16px;margin:2px 0 6px;}
+.rs-body{font-size:13px;color:#c9c7c4;line-height:1.55}
+.tag-fail{color:#e2586a;font-weight:700;font-size:11px;letter-spacing:.5px;}
+.tag-ok{color:#6bc79b;font-weight:700;font-size:11px;letter-spacing:.5px;}
+
+.cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;}
+.cmp-col{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:16px;font-size:12.5px;line-height:1.9}
+.cmp-mid{text-align:center;}
+.cmp-mid .pct{font-family:'Playfair Display',serif;font-size:30px;color:var(--crimson-bright)}
+
+.insight-box{border-left:3px solid var(--crimson-bright);background:var(--surface2);padding:16px 18px;border-radius:0 5px 5px 0;font-size:13.5px;line-height:1.65;color:#e8e6e3;}
+.rec-list{list-style:none;padding:0;margin:14px 0 0;}
+.rec-list li{padding:9px 0;border-bottom:1px solid #202023;font-size:13px;display:flex;justify-content:space-between;align-items:center;}
+.badge-hist{font-size:9.5px;color:var(--muted);border:1px solid var(--border);padding:2px 7px;border-radius:10px;white-space:nowrap;margin-left:10px;}
+
+textarea,select{width:100%;padding:11px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:inherit;font-size:13.5px;margin-bottom:16px;resize:vertical;min-height:64px;}
+label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px;}
+
+.success-box{text-align:center;padding:40px 20px;}
+.success-box .check{width:56px;height:56px;border-radius:50%;background:rgba(63,143,107,.15);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 18px;}
+.retain-line{color:var(--muted);font-size:13px;margin:4px 0;}
+.retain-line b{color:var(--text)}
+
+.mem-cat{display:inline-block;background:var(--surface2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:12px;margin:0 8px 8px 0;color:var(--muted)}
+.obs-card{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:16px;margin-bottom:12px;}
+.obs-card h4{margin:0 0 6px;font-family:'Playfair Display',serif;font-size:15px}
+.conf-high{color:var(--ok);font-weight:600;font-size:11.5px}
+.search-in{padding:12px 14px;font-size:13.5px;}
+
+.before-after{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;}
+.ba-box{border-radius:5px;padding:16px;font-size:13px;line-height:1.6;}
+.ba-without{background:#1a1414;border:1px solid #3a2226;color:#b9a5a5}
+.ba-with{background:var(--surface2);border:1px solid var(--crimson);color:#e8e6e3}
+.ba-label{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:block;font-weight:700;}
+.ba-without .ba-label{color:#8a6d6d}
+.ba-with .ba-label{color:var(--crimson-bright)}
+
+@media(max-width:520px){.stat-grid{grid-template-columns:1fr !important}}
+@media(max-width:900px){
+  .sidebar,#app:not(.sb-open) .sidebar{position:fixed;left:0;top:56px;z-index:30;width:230px;transform:translateX(-100%);visibility:hidden;transition:transform .25s ease,visibility 0s .25s;}
+  #app.sb-open .sidebar{transform:none;visibility:visible;transition:transform .25s ease;}
+  .tb-user{display:none}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .cmp{grid-template-columns:1fr}
+  .before-after{grid-template-columns:1fr}
+  table{display:block;overflow-x:auto;white-space:nowrap;}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="brand-wrap"><div class="logo brand-big">CYBER<span>MEMORY</span></div><div class="login-sub brand-sub">Security Operations</div></div>
+  <div class="login-box">
+    <input type="email" placeholder="Email" value="analyst@cybermemory.io">
+    <input type="password" placeholder="Password" value="••••••••">
+    <button class="btn btn-primary" onclick="enterApp()">SIGN IN</button>
+    <button class="btn btn-ghost" onclick="enterApp()">Use Demo Account</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tb-left"><button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button><div class="tb-brand">CYBER<span>MEMORY</span></div></div>
+    <div class="tb-user"><span class="dot"></span>Security Analyst</div>
+  </div>
+  <div class="shell">
+  <div class="sidebar"><div class="sb-inner">
+    <div class="sb-logo">CYBER<span>MEMORY</span></div>
+    <div class="nav-item active" data-view="dashboard" onclick="nav('dashboard')">Overview</div>
+    <div class="nav-item" data-view="incidents" onclick="nav('incidents')">Incidents</div>
+    <div class="nav-item" data-view="investigations" onclick="nav('investigations')">Investigations</div>
+    <div class="nav-item" data-view="memory" onclick="nav('memory')">Security Memory</div>
+    <div class="sb-bottom"><span class="dot"></span>Security Analyst — Online</div>
+  </div></div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <h1 class="pagetitle">Incident Intelligence</h1>
+      <p class="pagesub">Turn previous investigations into intelligence for the next incident.</p>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-active">03</div><div class="stat-label">Active Incidents</div></div>
+        <div class="stat-card"><div class="stat-num">27</div><div class="stat-label">Investigated</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-mem">184</div><div class="stat-label">Memory Records</div></div>
+        <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">Similar Incidents Found</div></div>
+      </div>
+      <div class="card">
+        <h3>Active Incidents</h3>
+        <table><thead><tr><th>ID</th><th>Type</th><th>Severity</th><th>Asset</th><th>Status</th><th>Detected</th><th></th></tr></thead>
+        <tbody id="dash-table"></tbody></table>
+      </div>
+      <div class="card">
+        <h3>Recent Memory Activity</h3>
+        <div id="mem-activity" style="font-size:13px;color:var(--muted);line-height:2.1"></div>
+      </div>
+    </div>
+
+    <!-- INCIDENTS LIST -->
+    <div class="view" id="view-incidents">
+      <h1 class="pagetitle">Incidents</h1>
+      <p class="pagesub">All logged security incidents across monitored services.</p>
+      <div class="card" id="new-inc" style="display:none"><h3>Log New Incident</h3>
+<label>Incident Type</label><select id="ni-type"><option value="">Select type…</option><option>Credential Stuffing</option><option>Suspicious Authentication</option><option>Phishing Credential Compromise</option><option>Brute Force</option><option>Unusual Outbound Traffic</option></select>
+<label>Severity</label><select id="ni-sev"><option value="">Select severity…</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select>
+<label>Affected Service</label><input id="ni-svc" placeholder="e.g. Authentication Gateway">
+<label>Detection Time</label><input id="ni-time" placeholder="e.g. 10:05 UTC">
+<label>Indicators (one per line)</label><textarea id="ni-ind" placeholder="e.g. 40 failed login attempts&#10;Rotating IP addresses"></textarea>
+<label>Description</label><textarea id="ni-desc"></textarea>
+<label>Failed attempts (optional)</label><input id="ni-att" type="number" min="0">
+<label>Affected accounts (optional)</label><input id="ni-acc" type="number" min="0">
+<div class="err" id="ni-err" style="margin:0 0 12px"></div><button class="btn-mem" onclick="addIncident()">ADD INCIDENT</button></div>
+      <div class="card">
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input class="search-in" style="margin:0" placeholder="Search incidents..." oninput="filterIncidents(this.value)">
+          <button class="btn-sm" style="white-space:nowrap" onclick="toggleNew()">+ New Incident</button>
+          <select style="width:160px;margin:0" onchange="filterSeverity(this.value)">
+            <option value="">All Severities</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option>
+          </select>
+        </div>
+        <table><thead><tr><th>ID</th><th>Type</th><th>Severity</th><th>Status</th><th>Service</th><th>Detected</th><th>Similarity</th><th></th></tr></thead>
+        <tbody id="inc-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- INCIDENT DETAIL -->
+    <div class="view" id="view-detail">
+      <div class="crumb" onclick="nav('incidents')">Incidents / <span id="detail-crumb"></span></div>
+      <div class="card" id="detail-body"></div>
+    </div>
+
+    <!-- INVESTIGATION -->
+    <div class="view" id="view-investigation">
+      <div class="crumb" onclick="nav('incidents')">Incidents / <span id="inv-crumb"></span></div>
+      <h1 class="pagetitle" style="font-size:26px">AI Investigation</h1>
+      <p class="pagesub" id="inv-sub"></p>
+
+      <div class="card" id="inv-progress-card">
+        <h3>Hindsight Recall</h3>
+        <div id="inv-progress"></div>
+      </div>
+
+      <div id="inv-results" style="display:none">
+        <div class="card">
+          <h3 id="matches-title">Related Incidents Found</h3>
+          <div id="match-cards"></div>
+        </div>
+
+        <div class="card">
+          <h3>Incident Memory Replay — What did we learn the last time?</h3>
+          <div id="replay-meta"></div><div id="replay-steps"></div>
+        </div>
+
+        <div class="card">
+          <h3>Current Incident vs. Historical Memory</h3>
+          <div class="cmp" id="cmp-panel"></div>
+        </div>
+
+        <div class="card">
+          <h3>AI Memory Insight</h3>
+          <div class="insight-box" id="insight-text"></div><div id="conflict-box"></div>
+          <div style="margin-top:16px;font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;">Recommended Investigation Path</div>
+          <ul class="rec-list" id="rec-list"></ul>
+        </div>
+
+        <div class="card">
+          <h3>Memory Advantage</h3>
+          <div class="before-after">
+            <div class="ba-box ba-without"><span class="ba-label">Without Organizational Memory</span><span id="ba-without-text"></span></div>
+            <div class="ba-box ba-with"><span class="ba-label">With CyberMemory</span><span id="ba-with-text"></span></div>
+          </div>
+        </div>
+
+        <div style="text-align:right;margin:24px 0 60px;">
+          <button class="btn-mem" onclick="goResolve()">CLOSE INVESTIGATION →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESOLVE -->
+    <div class="view" id="view-resolve">
+      <div class="crumb" onclick="nav('incidents')">Incidents / <span id="res-crumb"></span></div>
+      <h1 class="pagetitle" style="font-size:26px">Close Investigation</h1>
+      <p class="pagesub">Record what happened so future investigations can learn from it.</p>
+      <div class="card" id="resolve-form">
+        <label>Root Cause</label><textarea id="f-root" placeholder="e.g. Compromised credentials via phishing"></textarea><div class="err" id="e-root"></div>
+        <label>Investigation Steps</label><textarea id="f-steps" placeholder="What was checked and how"></textarea><div class="err" id="e-steps"></div>
+        <label>Actions Attempted</label><textarea id="f-actions" placeholder="Actions taken during response"></textarea><div class="err" id="e-actions"></div>
+        <label>What Failed?</label><textarea id="f-failed" placeholder="Actions that did not work, and why"></textarea><div class="err" id="e-failed"></div>
+        <label>What Worked?</label><textarea id="f-worked" placeholder="Actions that resolved the incident"></textarea><div class="err" id="e-worked"></div>
+        <label>Final Outcome</label>
+        <select id="f-outcome"><option value="">Select outcome…</option><option>Resolved</option><option>Partially Resolved</option><option>Escalated</option></select><div class="err" id="e-outcome"></div>
+        <label>Lesson Learned</label><textarea id="f-lesson" placeholder="The reusable knowledge from this incident"></textarea><div class="err" id="e-lesson"></div>
+        <button class="btn-mem" onclick="saveMemory()">SAVE TO SECURITY MEMORY</button>
+      </div>
+      <div class="card" id="resolve-success" style="display:none">
+        <div class="success-box">
+          <div class="check">✓</div>
+          <h2 class="serif" style="margin:0 0 6px">Memory Retained</h2>
+          <p style="color:var(--muted);font-size:13.5px" id="retain-msg"></p>
+          <div style="text-align:left;max-width:340px;margin:20px auto 0;">
+            <div class="retain-line">✓ <b>Root cause</b> saved</div>
+            <div class="retain-line">✓ <b>Successful response</b> saved</div>
+            <div class="retain-line">✓ <b>Failed response</b> saved</div>
+            <div class="retain-line">✓ <b>Lesson learned</b> saved</div>
+          </div>
+          <button class="btn-mem" style="margin-top:24px;width:auto;padding:11px 28px" onclick="openLearningLoop()">SEE THE LEARNING LOOP →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVESTIGATIONS (list of retained + in-progress) -->
+    <div class="view" id="view-investigations">
+      <h1 class="pagetitle">Investigations</h1>
+      <p class="pagesub">Active and resolved investigations, including newly learned memory.</p>
+      <div class="card">
+        <table><thead><tr><th>Incident</th><th>Status</th><th>Memory</th><th></th></tr></thead>
+        <tbody id="inv-list"></tbody></table>
+      </div>
+      <div class="card" id="audit-card"><h3>Audit Trail</h3><div id="audit-list"></div></div>
+      <div class="card" id="loop-demo" style="display:none">
+        <h3>Learning Loop — INC-1048 arrives</h3>
+        <p style="font-size:13px;color:var(--muted)">A new, similar incident just came in. Watch CyberMemory recall what was just learned.</p>
+        <div id="loop-content"></div>
+      </div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="view" id="view-memory">
+      <h1 class="pagetitle">Organizational Security Memory</h1>
+      <p class="pagesub">The security team's accumulated experience.</p>
+      <div class="card">
+        <div class="mem-cat">Incidents</div><div class="mem-cat">Investigation Patterns</div><div class="mem-cat">Root Causes</div>
+        <div class="mem-cat">Successful Responses</div><div class="mem-cat">Failed Responses</div><div class="mem-cat">Lessons Learned</div><div class="mem-cat">Observations</div>
+      </div>
+      <div class="card">
+        <h3>Search Organizational Memory</h3>
+        <input class="search-in" placeholder='Try: "rotating IP credential attacks"' oninput="memSearch(this.value)">
+        <div id="mem-results" style="margin-top:14px"></div>
+      </div>
+      <div class="card">
+        <h3>Refined Observations</h3>
+        <div id="obs-list"></div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const AUTH=['Credential Stuffing','Suspicious Authentication','Brute Force'], AUTHS=/auth|identity|sso|vpn/i;
+const KW={'rotating-ip':/rotat|distributed ip/,'multi-geo':/geograph|countr|location|region/,'failed-logins':/failed|login|authenticat|credential stuff/,'multi-account':/accounts/,'credential-list':/credential list|reused|leaked/,'phishing':/phish|spoof|lookalike/,'egress':/egress|outbound|destination/,'brute-force':/brute|single source/,'off-hours':/off-hours/};
+const LBL={'rotating-ip':'rotating IP behavior','multi-geo':'multi-location source pattern','failed-logins':'failed-login pattern','multi-account':'multiple affected accounts','credential-list':'credential-list / reuse signals','phishing':'phishing indicators','egress':'abnormal outbound traffic','brute-force':'brute-force pattern','off-hours':'off-hours activity'};
+const num=(t,re)=>{const m=t.match(re);return m?+m[1]:0};
+function prep(o){const t=o.indicators.join(' ');o.att=o.att||num(t,/(\d+)\s+failed/i);o.acc=o.acc||num(t,/(\d+)\s+(?:affected\s+)?accounts?/i);
+  o.tags=Object.keys(KW).filter(k=>KW[k].test((o.type+' '+t+' '+(o.description||'')).toLowerCase()));return o;}
+const H=(id,type,sev,asset,indicators,root,steps,actions,failed,why,worked,time,lesson,ts)=>prep({id,type,sev,asset,indicators,root,steps,actions,failed,why,worked,outcome:'Incident contained.',time,lesson,ts});
+const HIST=[
+H('INC-1021','Credential Stuffing','HIGH','Identity Service',['43 failed login attempts','Logins from multiple geographic locations','Rotating IP addresses','9 affected accounts'],'Compromised credentials',['Authentication logs analyzed','Rotating IP addresses identified','Affected accounts correlated'],'IP blocking, then account containment','IP addresses blocked','Attack continued because the attacker rotated IP addresses.','Account-level containment, credential reset, MFA enforcement','19 minutes','IP-only blocking was insufficient because the attacker rotated addresses. Account-level containment + credential reset + MFA successfully contained the incident.','2026-09-22'),
+H('INC-1038','Credential Stuffing','HIGH','Identity Service',['61 failed login attempts','Multiple geographic locations','Rotating IP addresses','14 affected accounts','Known credential list pattern'],'Reused passwords from a public credential list',['Login logs reviewed','Credential-list pattern confirmed','Accounts correlated'],'Geo-blocking, then forced reset','Geo-blocking of source regions','Attacker used proxy IPs inside allowed regions.','Forced credential reset with MFA enforcement','24 minutes','Geo-blocking is unreliable against proxy-based rotating-IP attacks; reset credentials and enforce MFA.','2026-09-27'),
+H('INC-1014','Suspicious Authentication','MEDIUM','Authentication Gateway',['31 failed login attempts','Rotating IP addresses','5 affected accounts'],'Leaked credentials from a third-party breach',['Gateway logs collected','Source IP churn observed','Targeted accounts listed'],'Rate limiting, then forced reset','Rate limiting on login endpoint','Distributed attempts across rotating IPs evaded the limits.','Forced password reset + MFA enrollment','27 minutes','Rate limiting alone does not stop distributed rotating-IP credential attacks.','2026-08-30'),
+H('INC-0987','Credential Stuffing','HIGH','Identity Service',['58 failed login attempts','Multiple geographic locations','Rotating IP addresses','14 affected accounts'],'Reused passwords across services',['Auth logs analyzed','Proxy IP ranges identified','Accounts correlated'],'Geo-blocking, then account containment','Geo-blocking suspicious regions','Residential proxy IPs sat within allowed regions.','Account containment + credential reset','22 minutes','Account-level response is more durable than network-layer blocking against proxy-based attacks.','2026-07-14'),
+H('INC-1035','Phishing Credential Compromise','HIGH','Email / SSO',['Spoofed login page reported','3 accounts compromised','Credentials entered on lookalike domain'],'Phished credentials via spoofed login page',['Reported page analyzed','Sign-in logs correlated','Compromised accounts listed'],'Domain blocklisting, then reset','Email domain blocklisting','A fresh unlisted domain appeared within hours.','Immediate credential reset + MFA + user notification','14 minutes','Blocklisting reacts too slowly to fresh phishing infrastructure; fast credential reset limits blast radius.','2026-09-26'),
+H('INC-1009','Brute Force','MEDIUM','VPN Gateway',['120 failed login attempts','Single source IP','1 targeted account'],'Weak password on a service account',['VPN logs reviewed','Single source confirmed'],'Manual monitoring, then IP block + lockout','Manual account monitoring only','Attempts continued without automated lockout.','Source IP block + account lockout + password rotation','11 minutes','For single-source brute force, IP blocking works when paired with account lockout.','2026-05-19'),
+H('INC-1002','Unusual Outbound Traffic','MEDIUM','API Gateway',['Abnormal egress volume','New destination ASN','Off-hours activity'],'Misconfigured backup job',['Egress logs reviewed','Destination traced','Job scheduler checked'],'Destination block, then job review','Blocking the destination ASN','Legitimate backup traffic was interrupted.','Correlated traffic with job scheduler; corrected job scope','33 minutes','Correlate egress spikes with scheduled jobs before blocking destinations.','2026-06-03')];
+const I=(id,type,sev,asset,status,detected,indicators,timeline)=>({id,type,sev,asset,status,detected,indicators,timeline});
+const INCIDENTS=[
+I('INC-1042','Suspicious Authentication','HIGH','Authentication Gateway','Investigating','02:13 UTC',['47 failed login attempts','Multiple geographic locations','Rotating IP addresses','12 affected accounts'],["02:13 — Alert generated","02:15 — Analyst assigned","02:17 — Authentication logs collected","02:19 — Historical memory search initiated"]),
+I('INC-1041','Unusual Outbound Traffic','MEDIUM','API Gateway','Investigating','01:42 UTC',['Abnormal egress volume','New destination ASN','Off-hours activity'],["01:42 — Alert generated","01:44 — Analyst assigned","01:47 — Traffic logs collected"]),
+I('INC-1038','Credential Stuffing','HIGH','Identity Service','Resolved','Yesterday',HIST[1].indicators,["Y-08:02 — Alert generated","Y-08:05 — Analyst assigned"]),
+I('INC-1035','Phishing Credential Compromise','HIGH','Email / SSO','Resolved','2 days ago',HIST[4].indicators,["Alert generated","Analyst assigned"]),
+I('INC-1021','Credential Stuffing','HIGH','Identity Service','Resolved','6 days ago',HIST[0].indicators,["Alert generated","Analyst assigned"]),
+I('INC-1048','Suspicious Authentication','HIGH','Authentication Gateway','Investigating','Today 09:20 UTC',['52 failed login attempts','Multiple geographic locations','Rotating IP addresses','10 affected accounts'],["09:20 — Alert generated","09:22 — Analyst assigned"])];
+ls('cm_custom',[]).forEach(o=>INCIDENTS.push(o));
+INCIDENTS.forEach(prep);
+let retained=ls('cm_retained',[]).filter(m=>m.tags);
+retained.forEach(m=>{const i=INCIDENTS.find(x=>x.id===m.id);if(i)i.status='Resolved'});
+let audit_=ls('cm_audit',[]);
+function audit(e){audit_.push({t:new Date().toISOString().slice(11,19),e});sv('cm_audit',audit_.slice(-60));}
+let currentIncidentId=null,cur={M:[],sel:0,rec:{}};
+
+/* ---------- memory retrieval ---------- */
+const pool=()=>{const m={};HIST.concat(retained).forEach(x=>m[x.id]=x);return Object.values(m)};
+function score(q,m){let s=0,ev=[];
+  if(q.type===m.type){s+=25;ev.push('Same incident type: '+q.type)}
+  else if(AUTH.includes(q.type)&&AUTH.includes(m.type)){s+=15;ev.push(`Related authentication incident types (${q.type} ~ ${m.type})`)}
+  if(q.asset===m.asset){s+=15;ev.push('Same service affected: '+q.asset)}
+  else if(AUTHS.test(q.asset)&&AUTHS.test(m.asset)){s+=5;ev.push('Both affect identity/authentication services')}
+  const hit=q.tags.filter(t=>m.tags.includes(t));
+  if(q.tags.length)s+=45*hit.length/q.tags.length;
+  hit.forEach(t=>ev.push('Similar '+LBL[t]));
+  [['att','failed-login volume'],['acc','affected-account count']].forEach(([k,l])=>{if(q[k]&&m[k]){const c=1-Math.min(1,Math.abs(q[k]-m[k])/Math.max(q[k],m[k]));s+=7.5*c;if(c>=.7)ev.push(`Similar ${l} (${q[k]} vs ${m[k]})`)}});
+  s=Math.min(99,Math.round(s));return {m,score:s,ev,conf:s>=75?'HIGH':s>=55?'MEDIUM':'LOW'};}
+const retrieve=q=>pool().filter(m=>m.id!==q.id).map(m=>score(q,m)).sort((a,b)=>b.score-a.score);
+
+function buildRecs(i,M){const r=[],add=(t,src)=>{if(!r.some(x=>x.t===t))r.push({t,src})};const ms=M.map(x=>x.m);
+  const by=re=>ms.filter(m=>re.test(m.steps.join(' ')+' '+m.root)).map(m=>m.id);
+  if(i.tags.includes('multi-account')||i.tags.includes('failed-logins'))add('Correlate affected accounts',by(/correlat|account/i));
+  if(i.tags.some(t=>['failed-logins','credential-list','phishing'].includes(t)))add('Check credential compromise indicators',by(/credential|password|leak|phish|reuse/i));
+  ms.slice(0,2).forEach(m=>add('Prioritize: '+m.worked,ms.filter(x=>x.worked===m.worked).map(x=>x.id)));
+  const mfa=ms.filter(m=>/mfa/i.test(m.worked)).map(m=>m.id);if(mfa.length)add('Review MFA status',mfa);
+  [...new Set(ms.slice(0,3).map(m=>m.failed))].forEach(f=>add('Avoid relying on: '+f,ms.filter(x=>x.failed===f).map(x=>x.id)));
+  return r.slice(0,7);}
+
+/* ---------- nav ---------- */
+function enterApp(){$('login').style.display='none';$('app').className='active';nav('dashboard');}
+function toggleSidebar(){$('app').classList.toggle('sb-open');}
+function nav(v){
+  if(window.innerWidth<=900)$('app').classList.remove('sb-open');
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  $('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  const it=document.querySelector('.nav-item[data-view="'+v+'"]');if(it)it.classList.add('active');
+  if(v==='dashboard')renderDashboard();
+  if(v==='incidents')renderIncidents(INCIDENTS);
+  if(v==='investigations')renderInvestigationsList();
+  if(v==='memory')renderMemory();
+}
+function renderDashboard(){
+  $('stat-mem').textContent=184+retained.length;
+  $('stat-active').textContent=String(INCIDENTS.filter(i=>i.status==='Investigating').length).padStart(2,'0');
+  $('dash-table').innerHTML=INCIDENTS.filter(i=>i.status==='Investigating'||i.id==='INC-1038').map(rowHtml).join('');
+  const a=audit_.filter(x=>/recalled|added/.test(x.e)).slice(-3).reverse().map(x=>`"${x.e}"`);
+  $('mem-activity').innerHTML=a.concat(['"Observation refined: rotating-IP attack pattern"']).map(x=>`<div>${x}</div>`).join('');
+}
+const rowHtml=i=>`<tr class="rowlink" onclick="openDetail('${i.id}')"><td>${i.id}</td><td>${i.type}</td><td><span class="sev sev-${i.sev.toLowerCase()}">${i.sev}</span></td><td>${i.asset}</td><td><span class="status-pill ${i.status.toLowerCase()}">${i.status}</span></td><td>${i.detected}</td><td><button class="btn-sm">View</button></td></tr>`;
+function renderIncidents(list){
+  $('inc-table').innerHTML=list.map(i=>{const t=retrieve(i)[0];return `<tr class="rowlink" onclick="openDetail('${i.id}')"><td>${i.id}</td><td>${i.type}</td><td><span class="sev sev-${i.sev.toLowerCase()}">${i.sev}</span></td><td><span class="status-pill ${i.status.toLowerCase()}">${i.status}</span></td><td>${i.asset}</td><td>${i.detected}</td><td>${t&&t.score>=35?t.score+'%':'—'}</td><td><button class="btn-sm">Open</button></td></tr>`}).join('');
+}
+function filterIncidents(q){q=q.toLowerCase();renderIncidents(INCIDENTS.filter(i=>i.id.toLowerCase().includes(q)||i.type.toLowerCase().includes(q)))}
+function filterSeverity(s){renderIncidents(s?INCIDENTS.filter(i=>i.sev===s):INCIDENTS)}
+
+/* ---------- new incident ---------- */
+function toggleNew(){const c=$('new-inc');c.style.display=c.style.display==='none'?'block':'none'}
+function addIncident(){
+  const v=id=>$(id).value.trim(),err=m=>{$('ni-err').textContent=m;$('ni-err').style.display='block'};
+  const ind=v('ni-ind').split('\n').map(x=>x.trim()).filter(Boolean);
+  if(!v('ni-type'))return err('Select an incident type.');
+  if(!v('ni-sev'))return err('Select a severity.');
+  if(v('ni-svc').length<3)return err('Enter the affected service.');
+  if(!v('ni-time'))return err('Enter the detection time.');
+  if(!ind.length||ind.some(x=>x.length<6))return err('Enter at least one indicator (one per line, 6+ characters each).');
+  if(v('ni-desc').length<10)return err('Enter a short description (10+ characters).');
+  const n=ls('cm_custom',[]),o={id:'INC-'+(1050+n.length),type:v('ni-type'),sev:v('ni-sev'),asset:esc(v('ni-svc')),status:'Investigating',detected:esc(v('ni-time')),indicators:ind.map(esc),description:esc(v('ni-desc')),att:+v('ni-att')||0,acc:+v('ni-acc')||0,timeline:[esc(v('ni-time'))+' — Alert generated']};
+  n.push(o);sv('cm_custom',n);prep(o);INCIDENTS.push(o);audit('New incident logged: '+o.id);
+  $('ni-err').style.display='none';$('new-inc').style.display='none';openDetail(o.id);
+}
+
+/* ---------- detail ---------- */
+function openDetail(id){
+  const i=INCIDENTS.find(x=>x.id===id);currentIncidentId=id;$('detail-crumb').textContent=id;
+  $('detail-body').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px"><div><div style="color:var(--muted);font-size:12px;letter-spacing:1px">${i.id}</div><h2 class="serif" style="margin:4px 0 8px;font-size:24px">${i.type}${i.type.includes('Activity')?'':' Activity'}</h2><span class="sev sev-${i.sev.toLowerCase()}">${i.sev}</span></div><div style="text-align:right;font-size:12.5px;color:var(--muted)">Status: <span class="status-pill ${i.status.toLowerCase()}">${i.status}</span><br>Detected: ${i.detected}<br>Affected: ${i.asset}</div></div>
+  <div style="margin-bottom:20px"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Indicators</div>${i.indicators.map(x=>`<div style="font-size:13.5px;padding:5px 0;border-bottom:1px solid #202023">${x}</div>`).join('')}</div>
+  <div style="margin-bottom:26px"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Timeline</div>${i.timeline.map(x=>`<div style="font-size:13px;color:#c9c7c4;padding:3px 0">${x}</div>`).join('')}</div>
+  <button class="btn-mem" onclick="openInvestigation('${i.id}')">INVESTIGATE WITH MEMORY</button>`;
+  nav('detail');
+}
+
+/* ---------- investigation ---------- */
+function openInvestigation(id){
+  const i=INCIDENTS.find(x=>x.id===id);currentIncidentId=id;
+  $('inv-crumb').textContent=id;$('inv-sub').textContent=`${id} — ${i.type} Activity`;
+  $('inv-results').style.display='none';nav('investigation');audit('Investigation started: '+id);
+  const steps=["Current incident analyzed","Indicators extracted","Historical memory searched","Similar incidents identified","Previous responses compared","Investigation memory replay generated"];
+  $('inv-progress').innerHTML=steps.map((s,k)=>`<div class="progress-item" style="animation-delay:${k*.28}s"><span class="tick">✓</span> ${s}${k===1?` <span style="color:var(--muted)">(${i.tags.map(t=>LBL[t]).join(', ')||'no known patterns'})</span>`:''}</div>`).join('');
+  setTimeout(()=>{const all=retrieve(i),M=all.filter(x=>x.score>=35).slice(0,3);cur={inc:i,M,sel:0,rec:{}};
+    audit(`Historical memory searched (${all.length} records) for ${id}`);audit(`${id} recalled ${M.length} related incident${M.length===1?'':'s'}${M.length?': '+M.map(x=>x.m.id).join(', '):''}`);
+    renderInv();},steps.length*280+300);
+}
+const GEN=t=>AUTH.includes(t)||/Phishing/.test(t)?'Check authentication logs, investigate suspicious IPs, reset compromised credentials, enable MFA — generic guidance with no historical context.':'Review relevant logs, identify the affected asset, block suspicious indicators, contain per standard runbook — generic guidance with no historical context.';
+function renderInv(){
+  const {inc:i,M}=cur;$('inv-results').style.display='block';
+  $('matches-title').textContent=M.length?`${M.length} RELATED INCIDENT${M.length>1?'S':''} FOUND`:'NO SUFFICIENTLY SIMILAR MEMORY FOUND';
+  if(!M.length){
+    $('match-cards').innerHTML='<div style="font-size:13px;color:var(--muted);line-height:1.6">No stored memory reached the minimum relevance (35%). Investigate with standard procedure — your findings will be retained for future incidents.</div>';
+    ['replay-meta','replay-steps','cmp-panel','conflict-box'].forEach(k=>$(k).innerHTML='');
+    $('insight-text').textContent='No historical evidence available for this incident yet.';
+    $('ba-with-text').textContent='No similar memory exists yet. Closing this investigation will create the first reusable memory for this pattern.';
+    cur.recs=['Collect and review relevant logs','Identify affected assets and accounts','Contain per standard runbook','Document findings for Security Memory'].map(t=>({t,src:[]}));
+  } else {
+    $('match-cards').innerHTML=M.map((r,k)=>{const m=r.m;return `<div class="match-card"><span class="rel">${r.score}%</span><h4>${m.id}${m.retained?' — NEW MEMORY':''}</h4><div class="type">${m.type} · <b>${r.conf} CONFIDENCE MEMORY</b> · ${m.ts}</div>
+    <div class="mm-label">Why CyberMemory retrieved this</div><div style="font-size:12.5px;line-height:1.7;margin-bottom:6px">${r.ev.map(e=>'• '+e).join('<br>')}</div>
+    <div class="mm-row"><div><div class="mm-label">Root Cause</div>${m.root}</div><div><div class="mm-label">Successful Response</div>${m.worked}</div><div><div class="mm-label">Failed Response</div>${m.failed}</div></div>
+    <div class="mm-row"><div><div class="mm-label">Previous Outcome</div>${m.outcome} ${m.time?'('+m.time+')':''}</div></div>
+    <button class="btn-sm" style="margin-top:14px" onclick="selMatch(${k})">VIEW MEMORY REPLAY</button></div>`}).join('');
+    drawReplay();
+    const t=M[0],m=t.m;
+    $('insight-text').innerHTML=`${t.conf==='LOW'?'<b>Weak evidence — treat with caution.</b> ':''}This incident resembles <b>${m.id}</b> (${t.score}% relevance, ${t.conf.toLowerCase()} confidence). In that investigation, <b>${m.failed}</b> failed${m.why?' — '+m.why.charAt(0).toLowerCase()+m.why.slice(1):''} <b>${m.worked}</b> successfully resolved it.`;
+    const fails=new Set(M.map(x=>x.m.failed));
+    $('conflict-box').innerHTML=M.length>1&&fails.size>1?`<div class="obs-card" style="margin-top:14px"><h4>Historical responses differed</h4><div style="font-size:12.5px;line-height:1.8">${M.map(x=>`${x.m.id} → ${x.m.failed} <span class="tag-fail">FAILED</span>; ${x.m.worked} <span class="tag-ok">WORKED</span>`).join('<br>')}</div><div style="font-size:12px;color:var(--muted);margin-top:8px">Recommendations are weighted toward the most relevant evidence (${m.id}, ${t.score}%), not a single certain answer.</div></div>`:'';
+    $('ba-with-text').innerHTML=`This resembles ${m.id} (${t.score}%). ${m.failed} previously failed${m.why?': '+m.why.charAt(0).toLowerCase()+m.why.slice(1):'.'} ${m.worked} succeeded — so containment is prioritized on that path. Evidence: ${t.ev.slice(0,2).join('; ')}.`;
+    cur.recs=buildRecs(i,M);
+  }
+  $('ba-without-text').textContent=GEN(i.type);
+  drawRecs();audit('Recommendations generated for '+i.id+' ('+cur.recs.length+')');
+}
+function selMatch(k){cur.sel=k;drawReplay();audit('Analyst inspected replay of '+cur.M[k].m.id);$('replay-steps').scrollIntoView({behavior:'smooth'})}
+function drawReplay(){
+  const r=cur.M[cur.sel],m=r.m,i=cur.inc;
+  $('replay-meta').innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Replaying <b style="color:var(--text)">${m.id}</b> — ${m.type} · retained ${m.ts} · ${r.score}% relevance</div>`;
+  const st=(n,t,b,d)=>`<div class="replay-step" style="animation-delay:${d}s"><div><div class="rs-num">STEP 0${n}</div><div class="rs-title">${t}</div><div class="rs-body">${b}</div></div></div>`;
+  $('replay-steps').innerHTML=st(1,'Incident Detected',`${m.att?m.att+' failed login attempts':m.indicators[0]}${m.acc?' · '+m.acc+' affected accounts':''}`,.05)+st(2,'Investigation Started',m.steps.join('<br>'),.15)+st(3,'First Response',`${m.failed}<br><span class="tag-fail">FAILED</span>${m.why?' — '+m.why:''}`,.25)+st(4,'Root Cause',m.root,.35)+st(5,'Successful Response',`${m.worked}<br><span class="tag-ok">SUCCESSFUL</span>`,.45)+st(6,'Final Outcome',`${m.outcome} Resolution time: ${m.time||'not recorded'}.`,.55)+st(7,'Lesson Learned',`<b>${m.lesson}</b>`,.65);
+  const side=o=>[o.att?o.att+' failed attempts':'',o.acc?o.acc+' affected accounts':'',...o.tags.map(t=>LBL[t])].filter(Boolean).map(l=>`<div>${l}</div>`).join('');
+  $('cmp-panel').innerHTML=`<div class="cmp-col"><div style="font-family:'Playfair Display',serif;font-size:15px;margin-bottom:10px">Current Incident</div><div>${i.type}</div>${side(i)}</div><div class="cmp-mid"><div style="font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Memory Match</div><div class="pct">${r.score}%</div><div style="font-size:10.5px;color:var(--muted)">${r.conf} confidence · prototype relevance indicator</div></div><div class="cmp-col"><div style="font-family:'Playfair Display',serif;font-size:15px;margin-bottom:10px">${m.id}</div><div>${m.type}</div>${side(m)}</div>`;
+}
+function drawRecs(){
+  $('rec-list').innerHTML=cur.recs.map((r,k)=>{const s=cur.rec[k]||{};const b=(key,l)=>`<button class="btn-sm" style="${s[key]?'border-color:var(--crimson-bright)':''}" onclick="recAct(${k},'${key}')">${l}</button>`;
+    return `<li style="flex-wrap:wrap;gap:8px"><span>${s.acc===false?'<s>'+r.t+'</s>':r.t}${r.src.length?r.src.map(id=>`<span class="badge-hist" style="cursor:pointer" onclick="selMatch(${Math.max(0,cur.M.findIndex(x=>x.m.id===id))})">Based on historical memory · ${id}</span>`).join(''):''}</span><span style="display:flex;gap:6px">${b('a','Accept')}${b('r','Reject')}${b('u','Useful')}${b('n','Not useful')}</span></li>`}).join('');
+}
+function recAct(k,key){const s=cur.rec[k]=cur.rec[k]||{};const pair={a:'r',r:'a',u:'n',n:'u'};s[key]=!s[key];if(s[key])s[pair[key]]=false;s.acc=s.a?true:s.r?false:undefined;
+  audit(`Analyst ${s[key]?'marked':'cleared'} "${cur.recs[k].t}" as ${{a:'accepted',r:'rejected',u:'useful',n:'not useful'}[key]}`);drawRecs();}
+
+/* ---------- resolve (RETAIN) ---------- */
+const FIELDS=['root','steps','actions','failed','worked','lesson'];
+const RULES={root:['Root cause',8,2],steps:['Investigation steps',20,4],actions:['Actions attempted',15,3],failed:['What failed',15,3],worked:['What worked',15,3],lesson:['Lesson learned',25,5]};
+const FILL=/^(n\/?a|none|nil|nothing|test(ing)?|asdf+|qwerty|lorem|xxx+|todo|tbd|unknown|ok|[.\-_\s]+)$/i;
+let submitted=false;
+function check(k){const el=$('f-'+k),v=el.value.trim();let e='';
+  if(k==='outcome'){if(!['Resolved','Partially Resolved','Escalated'].includes(el.value))e='Select a final outcome.'}
+  else{const [l,min,w]=RULES[k];
+    if(!v)e=l+' is required.';
+    else if(FILL.test(v)||v.toLowerCase()===(el.placeholder||'').trim().toLowerCase()||/^(.)\1+$/.test(v.replace(/\s/g,'')))e='Enter a real description — not filler or placeholder text.';
+    else if(v.length<min||v.split(/\s+/).length<w||(v.match(/[a-z]/gi)||[]).length<min*.6)e=`Be more specific (at least ${min} characters and ${w} words).`;}
+  $('e-'+k).textContent=e;$('e-'+k).style.display=e?'block':'none';el.classList.toggle('bad',!!e);return !e;}
+function goResolve(){
+  $('res-crumb').textContent=currentIncidentId;submitted=false;
+  FIELDS.concat('outcome').forEach(k=>{$('f-'+k).value='';$('f-'+k).classList.remove('bad');$('e-'+k).style.display='none'});
+  $('resolve-form').style.display='block';$('resolve-success').style.display='none';nav('resolve');
+}
+async function saveMemory(){
+
+  submitted = true;
+
+  const ok = FIELDS.concat('outcome').map(check);
+
+  if(ok.includes(false)){
+    $('f-'+FIELDS.concat('outcome')[ok.indexOf(false)]).focus();
+    return;
+  }
+
+  const i = INCIDENTS.find(x => x.id === currentIncidentId);
+
+  const value = k => $('f-'+k).value.trim();
+
+  const root = value('root');
+  const steps = value('steps');
+  const actions = value('actions');
+  const failed = value('failed');
+  const worked = value('worked');
+  const outcome = $('f-outcome').value;
+  const lesson = value('lesson');
+
+  // Build the actual memory that will be sent to Hindsight
+  const memoryContent = `
+Cybersecurity Incident: ${i.id}
+
+Incident Type: ${i.type}
+Severity: ${i.sev}
+Affected Service: ${i.asset}
+
+Root Cause:
+${root}
+
+Investigation Steps:
+${steps}
+
+Actions Attempted:
+${actions}
+
+What Failed:
+${failed}
+
+What Worked:
+${worked}
+
+Final Outcome:
+${outcome}
+
+Lesson Learned:
+${lesson}
+
+This incident should be remembered for future cybersecurity investigations.
+`.trim();
+
+  try {
+
+    // ================================
+    // SEND MEMORY TO HINDSIGHT
+    // ================================
+
+    console.log("Sending memory to Hindsight...");
+
+    const result = await storeMemory(memoryContent);
+
+    console.log("Hindsight memory saved:", result);
+
+    // ================================
+    // ALSO SAVE TO LOCAL CYBERMEMORY
+    // ================================
+
+    const rec = {
+      id: i.id,
+      type: i.type,
+      sev: i.sev,
+      asset: i.asset,
+      indicators: i.indicators,
+      att: i.att,
+      acc: i.acc,
+      tags: i.tags,
+      root: root,
+      steps: steps.split(/\n|;/)
+        .map(s => s.trim())
+        .filter(Boolean),
+      actions: actions,
+      failed: failed,
+      why: '',
+      worked: worked,
+      outcome: outcome,
+      time: '',
+      lesson: lesson,
+      ts: new Date().toISOString().slice(0,16).replace('T',' '),
+      retained: true
+    };
+
+    retained = retained
+      .filter(m => m.id !== rec.id)
+      .concat(rec);
+
+    sv('cm_retained', retained);
+
+    i.status = 'Resolved';
+
+    audit('Investigation closed: ' + i.id);
+    audit(i.id + ' added to organizational memory');
+    audit('Memory successfully sent to Hindsight Cloud');
+
+    // ================================
+    // SHOW SUCCESS
+    // ================================
+
+    $('resolve-form').style.display = 'none';
+    $('resolve-success').style.display = 'block';
+
+    $('retain-msg').textContent =
+      `${i.id} has been saved to CyberMemory and Hindsight Cloud.`;
+
+  } catch(error) {
+
+    console.error("Hindsight save failed:", error);
+
+    alert(
+      "Memory could not be saved to Hindsight.\n\n" +
+      error.message
+    );
+
+  }
+}
+function openLearningLoop(){openDetail('INC-1048')}
+
+/* ---------- investigations list / loop / audit ---------- */
+function renderInvestigationsList(){
+  $('inv-list').innerHTML=INCIDENTS.map(i=>`<tr class="rowlink" onclick="openDetail('${i.id}')"><td>${i.id} — ${i.type}</td><td><span class="status-pill ${i.status.toLowerCase()}">${i.status}</span></td><td>${retained.some(m=>m.id===i.id)?'<span style="color:var(--ok)">Retained ✓</span>':'—'}</td><td><button class="btn-sm">Open</button></td></tr>`).join('');
+  const q=INCIDENTS.find(x=>x.id==='INC-1048'),r=q&&retrieve(q).filter(x=>x.m.retained)[0];
+  $('loop-demo').style.display=r?'block':'none';
+  if(r){const m=r.m;$('loop-content').innerHTML=`<div class="insight-box" style="margin-bottom:14px"><b>NEW MEMORY FOUND</b><br>"${m.id} was recently resolved: ${m.worked}." (${r.score}% relevance, ${r.conf.toLowerCase()} confidence)</div><div class="insight-box" style="margin-bottom:14px;border-left-color:var(--warn)"><b>PREVIOUS LESSON</b><br>"${m.failed} — failed or was ineffective."</div><div class="insight-box"><b>CURRENT GUIDANCE</b><br>"${m.lesson}"</div><button class="btn-sm" style="margin-top:14px" onclick="openDetail('INC-1048')">OPEN INC-1048 AND INVESTIGATE</button>`}
+  $('audit-list').innerHTML=audit_.slice(-12).reverse().map(a=>`<div style="font-size:12.5px;color:var(--muted);padding:3px 0">${a.t} UTC — ${a.e}</div>`).join('')||'<div style="font-size:12.5px;color:var(--muted)">No activity yet.</div>';
+}
+
+/* ---------- memory page ---------- */
+function renderMemory(){memSearch('');
+  const P=pool(),obs=[['Rotating-IP Attacks',P.filter(m=>m.tags.includes('rotating-ip')),'Attackers frequently rotate source IPs during credential attacks, making IP-only blocking ineffective on its own.'],['Account-Level Containment',P.filter(m=>/account|credential reset|mfa/i.test(m.worked)),'Credential reset combined with MFA or account containment resolved credential-based incidents where network-layer blocking did not.']];
+  $('obs-list').innerHTML=obs.map(([t,L,d])=>`<div class="obs-card"><h4>${t}</h4><div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">Observed across <b style="color:var(--text)">${L.length} incidents</b> · <span class="conf-high">Confidence: ${L.length>=5?'High':L.length>=3?'Medium':'Low'}</span></div><div style="font-size:13px;line-height:1.6">${d}</div><div style="font-size:11px;color:var(--muted);margin-top:8px">Evidence: ${L.map(m=>m.id).join(', ')}</div></div>`).join('');}
+const STOP=/^(have|has|the|and|for|any|seen|we|with|did|what|are|was|how|that|this|from)$/;
+function memSearch(q){
+  const toks=q.toLowerCase().split(/\W+/).filter(t=>t.length>2&&!STOP.test(t));let R;
+  if(!toks.length)R=pool().sort((a,b)=>b.ts.localeCompare(a.ts)).slice(0,4).map(m=>({m,hits:[]}));
+  else R=pool().map(m=>{const b=(m.type+' '+m.indicators.join(' ')+' '+m.root+' '+m.worked+' '+m.failed+' '+m.lesson+' '+m.asset).toLowerCase();return {m,hits:toks.filter(t=>b.includes(t.slice(0,5)))}}).filter(x=>x.hits.length).sort((a,b)=>b.hits.length-a.hits.length).slice(0,5);
+  $('mem-results').innerHTML=R.map(({m,hits})=>`<div class="obs-card"><h4>${m.id}${m.retained?' — NEW MEMORY':''}</h4><div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">${m.type} · ${m.sev} · ${m.asset} · retained ${m.ts} · source ${m.id}</div>${hits.length?`<div style="font-size:12px;margin-bottom:6px"><b>Why it matches:</b> ${hits.join(', ')}</div>`:''}<div class="mm-row"><div><div class="mm-label">Root Cause</div>${m.root}</div><div><div class="mm-label">What Worked</div>${m.worked}</div><div><div class="mm-label">What Failed</div>${m.failed}</div></div><div style="font-size:13px;line-height:1.6;margin-top:8px"><b>Outcome:</b> ${m.outcome}<br><b>Lesson:</b> ${m.lesson}</div><div style="font-size:11px;color:var(--muted);margin-top:6px">Relevant to future: ${m.tags.map(t=>LBL[t]).join(', ')||'—'}</div></div>`).join('')||'<div style="color:var(--muted);font-size:13px">No matching memory found.</div>';
+}
+FIELDS.forEach(k=>$('f-'+k).addEventListener('input',()=>submitted&&check(k)));
+$('f-outcome').addEventListener('change',()=>submitted&&check('outcome'));
+renderDashboard();
+</script>
+</body>
+</html>
